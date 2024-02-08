@@ -55,13 +55,24 @@ int main(int argc, const char** argv)
 
   pImpl->CommitDeviceData();
   pImpl->Run(w, h, hdrData.data(), ldrData.data()); // (const float4*)
+  
+  // just flip data by Y axis
+  //
+  std::vector<unsigned> flipedYData(w*h);
+  for (unsigned y = 0; y < h; y++)
+  {
+    const unsigned offset1 = (h - y - 1)*w; 
+    const unsigned offset2 = y*w;
+    for(unsigned x=0; x<w; x++)
+      flipedYData[offset2+x] = ldrData[offset1 + x];
+  }
 
   if(onGPU)
-    LiteImage::SaveBMP("zout_gpu.bmp", ldrData.data(), w, h);
+    LiteImage::SaveBMP("zout_gpu.bmp", flipedYData.data(), w, h);
   else if(isISPC)
-    LiteImage::SaveBMP("zout_ispc.bmp", ldrData.data(), w, h);
+    LiteImage::SaveBMP("zout_ispc.bmp", flipedYData.data(), w, h);
   else
-    LiteImage::SaveBMP("zout_cpu.bmp", ldrData.data(), w, h);
+    LiteImage::SaveBMP("zout_cpu.bmp", flipedYData.data(), w, h);
 
   std::cout << "whitePoint = " << pImpl->getWhitePoint() << std::endl;
 
