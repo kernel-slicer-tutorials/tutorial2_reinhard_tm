@@ -71,6 +71,10 @@ if(USE_ISPC)
 
 elseif(USE_VULKAN)
 
+  add_subdirectory(external/volk)
+  add_compile_definitions(USE_VOLK)
+  add_compile_definitions(USE_VULKAN)
+
   add_executable(testapp ${MAIN_SOURCE} 
                          ${VKGEN_SOURCE} 
                          ${VKUTILS_SOURCE})
