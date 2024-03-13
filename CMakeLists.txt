@@ -19,8 +19,8 @@ find_package(OpenMP)
 find_package(Vulkan)
 include_directories(${Vulkan_INCLUDE_DIR})
 
-include_directories("external/vkutils" 
-                    "external/volk" 
+include_directories("external/vkutils"
+                    "external/volk"
                     "external/LiteMath"
                     "external/tinyexr"
                     "external/tinyexr/deps/miniz")
@@ -35,9 +35,12 @@ endif()
 #uncomment this to detect broken memory problems via gcc sanitizers
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize-address-use-after-scope -fno-omit-frame-pointer -fsanitize=leak -fsanitize=undefined -fsanitize=bounds-strict")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wno-attributes")
+if(NOT MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wno-attributes")
+  set(PLATFORM_DEPENDEPNT_LIBS "${Vulkan_LIBRARY} dl")
+endif()
 
-set(MAIN_SOURCE main.cpp 
+set(MAIN_SOURCE main.cpp
                 reinhard.cpp
                 external/LiteMath/Image2d.cpp
                 imageutils.cpp)
@@ -57,17 +60,17 @@ set(VKUTILS_SOURCE external/vkutils/vk_utils.cpp
                    external/vkutils/vk_context.cpp
                    external/vkutils/vk_alloc_simple.cpp
                    external/vkutils/vk_pipeline.cpp
-                   external/vkutils/vk_descriptor_sets.cpp)    
+                   external/vkutils/vk_descriptor_sets.cpp)
 
 add_library(miniz external/tinyexr/deps/miniz/miniz.c)
 
 if(USE_ISPC)
 
-  add_executable(testapp ${MAIN_SOURCE} 
-                         ${VKGEN_SOURCE} 
-                         ${VKUTILS_SOURCE} 
+  add_executable(testapp ${MAIN_SOURCE}
+                         ${VKGEN_SOURCE}
+                         ${VKUTILS_SOURCE}
                          ${ISPC_SOURCE})
-  target_link_libraries(testapp LINK_PUBLIC miniz ${Vulkan_LIBRARY} ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX volk dl)        
+  target_link_libraries(testapp LINK_PUBLIC miniz ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX volk ${PLATFORM_DEPENDEPNT_LIBS})
 
 elseif(USE_VULKAN)
 
@@ -75,16 +78,16 @@ elseif(USE_VULKAN)
   add_compile_definitions(USE_VOLK)
   add_compile_definitions(USE_VULKAN)
 
-  add_executable(testapp ${MAIN_SOURCE} 
-                         ${VKGEN_SOURCE} 
+  add_executable(testapp ${MAIN_SOURCE}
+                         ${VKGEN_SOURCE}
                          ${VKUTILS_SOURCE})
 
-  target_link_libraries(testapp LINK_PUBLIC miniz ${Vulkan_LIBRARY} ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX volk dl)            
+  target_link_libraries(testapp LINK_PUBLIC miniz ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX volk ${PLATFORM_DEPENDEPNT_LIBS})
 
 else()
-  
+
   add_executable(testapp ${MAIN_SOURCE})
-  target_link_libraries(testapp LINK_PUBLIC miniz ${Vulkan_LIBRARY} ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX)  
+  target_link_libraries(testapp LINK_PUBLIC miniz ${Vulkan_LIBRARY} ${FREEIMAGE_LIBRARIES} OpenMP::OpenMP_CXX)
 
 endif()
 

@@ -15,8 +15,8 @@ class ReinhardTM
 {
 public:
   ReinhardTM(){}
-  
-  virtual void Run(int w, int h, const float* inData __attribute__((size("w*h*4"))), uint32_t* outData __attribute__((size("w*h"))));
+
+  virtual void Run(int w, int h, const float* inData [[size("w*h*4")]], uint32_t* outData [[size("w*h")]]);
 
   virtual void CommitDeviceData(){}
   virtual void GetExecutionTime(const char* a_funcName, float a_out[4]){ a_out[0] = m_time;}
